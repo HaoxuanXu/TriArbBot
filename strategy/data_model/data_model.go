@@ -2,8 +2,7 @@ package datamodel
 
 // condition map records the coin pair and their corresponding spreads
 type ConditionMap struct {
-	Mapper    map[string]float64
-	BaseCoins []string
+	Mapper map[string]float64
 }
 
 type CoinPairs struct {

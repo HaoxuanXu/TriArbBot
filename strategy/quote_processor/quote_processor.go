@@ -28,8 +28,8 @@ func parseQuotes(condition *datamodel.ConditionMap, dependency *datamodel.CoinDe
 			pairedCoinQuote := quotes[fmt.Sprintf("%s/USD", pairedCoin)]
 			coinPairQuote := quotes[coinPair]
 
-			// We assume we are committing $10000
-			finalReturn := (baseCoinQuote.AskPrice * coinPairQuote.AskPrice) / pairedCoinQuote.BidPrice
+			// We assume we are committing to buy 1 share of base coin
+			finalReturn := coinPairQuote.AskPrice * pairedCoinQuote.BidPrice
 			spreadPercent := (finalReturn - baseCoinQuote.AskPrice) / baseCoinQuote.AskPrice
 
 			condition.Mapper[coinPair] = spreadPercent
