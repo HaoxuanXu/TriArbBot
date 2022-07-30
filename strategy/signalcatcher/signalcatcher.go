@@ -6,9 +6,9 @@ func GetSignal(condition *datamodel.ConditionMap) string {
 
 	maxSpread := 0.0
 	winningPair := ""
-	for coinPair, spread := range condition.Mapper {
-		if spread > maxSpread {
-			maxSpread = spread
+	for coinPair, spreadAndEntry := range condition.Mapper {
+		if spreadAndEntry[0] > maxSpread {
+			maxSpread = spreadAndEntry[0]
 			winningPair = coinPair
 		}
 	}

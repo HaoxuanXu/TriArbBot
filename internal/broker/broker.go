@@ -17,6 +17,7 @@ type AlpacaBroker struct {
 	Clock               alpaca.Clock
 	MaxPortfolioPercent float64
 	Cash                float64
+	ENTRY_LIMIT         float64
 }
 
 // GetBroker function creates an instance of the AlpacaBroker struct
@@ -46,6 +47,7 @@ func (broker *AlpacaBroker) initialize(accountType, serverType string, entryPerc
 	broker.Clock = *clock
 	broker.Cash = broker.account.Cash.InexactFloat64()
 	broker.MaxPortfolioPercent = entryPercent
+	broker.ENTRY_LIMIT = broker.Cash * broker.MaxPortfolioPercent
 }
 
 func (broker *AlpacaBroker) refreshOrderStatus(orderID string) (string, *alpaca.Order) {

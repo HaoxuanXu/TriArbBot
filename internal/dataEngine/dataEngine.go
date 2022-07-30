@@ -1,4 +1,4 @@
-package dataengine
+package dataEngine
 
 import (
 	"log"
@@ -27,9 +27,9 @@ func (engine *MarketDataEngine) initialize(accountType, serverType string) {
 	)
 }
 
-func (engine *MarketDataEngine) GetLatestCryptoQuotes(symbols []string) map[string]marketdata.CryptoQuote {
+func (engine *MarketDataEngine) GetLatestCryptoQuotes(symbols []string) map[string]marketdata.CryptoXBBO {
 
-	quotes, err := engine.client.GetLatestCryptoQuotes(symbols, "FTXU")
+	quotes, err := engine.client.GetLatestCryptoXBBOs(symbols, []string{"FTXU"})
 	if err != nil {
 		log.Printf("error occurred when getting latest quotes: %s\n", err)
 	}

@@ -3,36 +3,65 @@ package quoteprocessor
 import (
 	"fmt"
 
-	"github.com/HaoxuanXu/TriArbBot/internal/dataengine"
+	"github.com/HaoxuanXu/TriArbBot/internal/dataEngine"
 	datamodel "github.com/HaoxuanXu/TriArbBot/strategy/data_model"
 	"github.com/alpacahq/alpaca-trade-api-go/v2/marketdata"
 )
 
 func ProcessCryptoQuotes(
-	condition *datamodel.ConditionMap,
-	dependency *datamodel.CoinDependency,
-	pairs *datamodel.CoinPairs,
-	engine *dataengine.MarketDataEngine) {
-	cryptoQuotes := engine.GetLatestCryptoQuotes(pairs.Pairs)
+	model *datamodel.Model,
+	engine *dataEngine.MarketDataEngine) {
+	cryptoQuotes := engine.GetLatestCryptoQuotes(model.CoinPairs.Pairs)
 
-	parseQuotes(condition, dependency, cryptoQuotes)
+	parseQuotes(model, cryptoQuotes)
 }
 
-func parseQuotes(condition *datamodel.ConditionMap, dependency *datamodel.CoinDependency, quotes map[string]marketdata.CryptoQuote) {
-	for baseCoin, pairedCoinList := range dependency.Dependency {
+func parseQuotes(model *datamodel.Model, quotes map[string]marketdata.CryptoXBBO) {
+	for baseCoin, pairedCoinList := range model.CoinDependency.Dependency {
 		for _, pairedCoin := range pairedCoinList {
-			coinPair := fmt.Sprintf("%s/%s", pairedCoin, baseCoin)
+			coinPair := fmt.Sprintf("%s/%s", baseCoin, pairedCoin)
 
 			// get the respective quotes
 			baseCoinQuote := quotes[fmt.Sprintf("%s/USD", baseCoin)]
 			pairedCoinQuote := quotes[fmt.Sprintf("%s/USD", pairedCoin)]
 			coinPairQuote := quotes[coinPair]
 
-			// We assume we are committing to buy 1 share of base coin
-			finalReturn := coinPairQuote.AskPrice * pairedCoinQuote.BidPrice
-			spreadPercent := (finalReturn - baseCoinQuote.AskPrice) / baseCoinQuote.AskPrice
+			spreadPercent, maxEntryCash := calculateSpreadPercentAndEntryAmount(&baseCoinQuote, &pairedCoinQuote, &coinPairQuote)
 
-			condition.Mapper[coinPair] = spreadPercent
+			model.ConditionMap.Mapper[coinPair] = []float64{spreadPercent, maxEntryCash}
+
+			model.CoinPairs.Quotes[baseCoin] = &baseCoinQuote
+			model.CoinPairs.Quotes[pairedCoin] = &pairedCoinQuote
+			model.CoinPairs.Quotes[coinPair] = &coinPairQuote
+
 		}
 	}
+}
+
+func calculateSpreadPercentAndEntryAmount(baseCoinQuote, pairedCoinQuote, coinPairQuote *marketdata.CryptoXBBO) (float64, float64) {
+
+	// enter by buying baseCoin
+	var pairedCoinQty float64
+	baseCoinQty := baseCoinQuote.AskSize
+
+	// sell baseCoin for pairedCoin
+	if pairedCoinQty = baseCoinQuote.AskSize * coinPairQuote.BidPrice; pairedCoinQty > coinPairQuote.BidSize {
+
+		// reduce entry amount so that we can buy avoid getting into level 2 for pairedCoin
+		baseCoinQty *= (coinPairQuote.BidSize / pairedCoinQty)
+		pairedCoinQty = coinPairQuote.BidSize
+	}
+
+	// sell pairedCoin for USD
+	if pairedCoinQty > pairedCoinQuote.BidSize {
+		baseCoinQty *= (pairedCoinQuote.BidSize / pairedCoinQty)
+		pairedCoinQty = pairedCoinQuote.BidSize
+	}
+
+	entryCash := baseCoinQty * baseCoinQuote.AskPrice
+	exitCash := pairedCoinQty * pairedCoinQuote.BidPrice
+	spreadPercent := (exitCash - entryCash) / entryCash
+
+	return spreadPercent, entryCash
+
 }
