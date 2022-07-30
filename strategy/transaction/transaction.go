@@ -12,7 +12,7 @@ import (
 
 func BuyBaseCoin(baseCoinSymbol string, brokerage *broker.AlpacaBroker, model *datamodel.Model) *alpaca.Order {
 
-	qty := math.Min(brokerage.ENTRY_LIMIT, model.ConditionMap.Mapper[baseCoinSymbol][1]) / model.CoinPairs.Quotes[baseCoinSymbol].AskPrice
+	qty := math.Min(brokerage.ENTRY_LIMIT, model.ConditionMap[baseCoinSymbol].MaxEntryCashAmount) / model.Quotes[baseCoinSymbol].AskPrice
 	inputSymbol := fmt.Sprintf("%s/USD", baseCoinSymbol)
 
 	order := brokerage.SubmitOrder(qty, inputSymbol, broker.BUY_SIDE, broker.MARKET_ORDER, broker.GTC)

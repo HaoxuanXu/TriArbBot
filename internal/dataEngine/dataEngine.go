@@ -27,12 +27,14 @@ func (engine *MarketDataEngine) initialize(accountType, serverType string) {
 	)
 }
 
-func (engine *MarketDataEngine) GetLatestCryptoQuotes(symbols []string) map[string]marketdata.CryptoXBBO {
+func (engine *MarketDataEngine) GetLatestCryptoQuotes(symbols []string) map[string]marketdata.CryptoQuote {
 
-	quotes, err := engine.client.GetLatestCryptoXBBOs(symbols, []string{"FTXU"})
+	quotes, err := engine.client.GetLatestCryptoQuotes(symbols, "FTXU")
 	if err != nil {
 		log.Printf("error occurred when getting latest quotes: %s\n", err)
 	}
 
+	log.Printf("ETHBTC quote: %v\n", quotes["ETHBTC"])
+	log.Printf("ETHUSD quote: %v\n", quotes["ETHUSD"])
 	return quotes
 }
