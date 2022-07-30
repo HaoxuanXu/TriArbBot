@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/HaoxuanXu/TriArbBot/internal/dataEngine"
+	data_engine "github.com/HaoxuanXu/TriArbBot/internal/data_engine"
 	datamodel "github.com/HaoxuanXu/TriArbBot/strategy/data_model"
 	"github.com/alpacahq/alpaca-trade-api-go/v2/marketdata"
 )
 
 func ProcessCryptoQuotes(
 	model *datamodel.Model,
-	engine *dataEngine.MarketDataEngine,
+	engine *data_engine.MarketDataEngine,
 	coinDependency map[string][]string) {
 	cryptoQuotes := engine.GetLatestCryptoQuotes(model.CoinPairs)
 

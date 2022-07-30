@@ -1,24 +1,26 @@
 package strategy
 
 import (
-	"log"
 	"strings"
 	"time"
 
 	"github.com/HaoxuanXu/TriArbBot/config"
 	"github.com/HaoxuanXu/TriArbBot/internal/broker"
-	"github.com/HaoxuanXu/TriArbBot/internal/dataEngine"
+	"github.com/HaoxuanXu/TriArbBot/internal/data_engine"
 	datamodel "github.com/HaoxuanXu/TriArbBot/strategy/data_model"
 	"github.com/HaoxuanXu/TriArbBot/strategy/pipeline"
 	quoteprocessor "github.com/HaoxuanXu/TriArbBot/strategy/quote_processor"
 	"github.com/HaoxuanXu/TriArbBot/strategy/signalcatcher"
+	tradelogger "github.com/HaoxuanXu/TriArbBot/strategy/trade_logger"
 )
 
 func RunTriangularArbitrage(creds config.Credentials, assets config.Assets, entryPercent float64) {
 
+	log := tradelogger.TradeLogger()
+
 	log.Println("Initializing strategy ...")
 	model := datamodel.GetModel(assets)
-	marketDataEngine := dataEngine.GetDataEngine(creds.ACCOUNT_TYPE, creds.SERVER_TYPE)
+	marketDataEngine := data_engine.GetDataEngine(creds.ACCOUNT_TYPE, creds.SERVER_TYPE)
 	brokerage := broker.GetBroker(creds.ACCOUNT_TYPE, creds.SERVER_TYPE, entryPercent)
 
 	log.Println("Begin strategy")
